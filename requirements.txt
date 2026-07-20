@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+streamlit
+google-genai
+gitpython
+python-dotenv
+requests
+streamlit-code-editor
