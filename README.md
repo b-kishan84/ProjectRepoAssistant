@@ -9,6 +9,7 @@ An AI-powered chatbot that helps developers understand any public (or private) G
 - **AI-generated summary** — beginner-friendly explanation of the project
 - **Chat with the repo** — ask natural language questions about the codebase
 - **File explorer** — browse and get AI explanations of any file
+- **Interactive Code Snippets** — highlight any code in the editor and click "Ask AI" for instant context-aware help
 
 ## Tech Stack
 
@@ -16,7 +17,7 @@ An AI-powered chatbot that helps developers understand any public (or private) G
 |-----------|------------|
 | Backend | Python, FastAPI |
 | Frontend | Streamlit |
-| AI Model | Google Gemini (gemini-2.5-flash) |
+| AI Model | Google Gemini (gemini-3.5-flash) |
 | Git Operations | GitPython |
 
 ## Setup
