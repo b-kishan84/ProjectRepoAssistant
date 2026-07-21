@@ -7,9 +7,11 @@ import requests
 import time
 from code_editor import code_editor
 
+import os
+
 # ─── Configuration ─────────────────────────────────────────────────────────────
 
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 st.set_page_config(
     page_title="GitHub Repo Assistant",
