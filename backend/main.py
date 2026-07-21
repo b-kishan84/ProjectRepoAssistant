@@ -43,8 +43,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import json
+
 # In-memory cache for analyzed repos (MVP — no persistence)
 _repo_cache: dict[str, dict] = {}
+
+def _get_repo_analysis(repo_url: str) -> dict | None:
+    """Retrieve analysis from memory cache or disk fallback."""
+    repo_url = clean_github_url(repo_url)
+    if repo_url in _repo_cache:
+        return _repo_cache[repo_url]
+    
+    # Fallback to disk
+    try:
+        from backend.services.repo_cloner import get_clone_path
+        cache_path = get_clone_path(repo_url) / ".repo_analysis.json"
+        if cache_path.exists():
+            with open(cache_path, "r", encoding="utf-8") as f:
+                analysis = json.load(f)
+                _repo_cache[repo_url] = analysis
+                return analysis
+    except Exception as e:
+        logger.error(f"Failed to load cached analysis from disk: {e}")
+    
+    return None
+
+def _save_repo_analysis(repo_url: str, analysis: dict):
+    """Save analysis to memory cache and disk."""
+    repo_url = clean_github_url(repo_url)
+    _repo_cache[repo_url] = analysis
+    try:
+        from backend.services.repo_cloner import get_clone_path
+        clone_path = get_clone_path(repo_url)
+        clone_path.mkdir(parents=True, exist_ok=True)
+        cache_path = clone_path / ".repo_analysis.json"
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(analysis, f)
+    except Exception as e:
+        logger.error(f"Failed to save analysis to disk: {e}")
 
 
 # ─── Endpoints ─────────────────────────────────────────────────────────────────
@@ -81,8 +117,8 @@ async def analyze_repository(request: CloneRequest):
         ai_summary = generate_summary(analysis)
         analysis["ai_summary"] = ai_summary
 
-        # Cache the analysis for chat
-        _repo_cache[repo_url] = analysis
+        # Cache the analysis for chat and persist to disk
+        _save_repo_analysis(repo_url, analysis)
 
         # Build response
         return RepoSummary(
@@ -119,7 +155,7 @@ async def chat_about_repo(request: ChatRequest):
     logger.info(f"Chat request for {repo_url}: {request.question[:80]}...")
 
     # Check if repo has been analyzed
-    analysis = _repo_cache.get(repo_url)
+    analysis = _get_repo_analysis(repo_url)
     if not analysis:
         raise HTTPException(
             status_code=404,
@@ -176,7 +212,7 @@ async def get_file_content(repo_url: str, file_path: str):
         file_path: Relative path to the file within the repo
     """
     repo_url = clean_github_url(repo_url)
-    analysis = _repo_cache.get(repo_url)
+    analysis = _get_repo_analysis(repo_url)
     if not analysis:
         raise HTTPException(
             status_code=404,
@@ -213,7 +249,7 @@ async def get_file_content(repo_url: str, file_path: str):
 async def get_file_tree(repo_url: str):
     """Get the file list for a previously analyzed repo."""
     repo_url = clean_github_url(repo_url)
-    analysis = _repo_cache.get(repo_url)
+    analysis = _get_repo_analysis(repo_url)
     if not analysis:
         raise HTTPException(status_code=404, detail="Repository not analyzed yet.")
 
@@ -234,7 +270,7 @@ async def chat_about_code_snippet(request: SnippetChatRequest):
     logger.info(f"Snippet chat for {request.file_path}: {request.question[:80]}...")
 
     # Check if repo has been analyzed
-    analysis = _repo_cache.get(repo_url)
+    analysis = _get_repo_analysis(repo_url)
     if not analysis:
         raise HTTPException(
             status_code=404,

@@ -22,7 +22,7 @@ class Settings:
     GITHUB_TOKEN: str = os.getenv("GITHUB_TOKEN", "")
 
     # Cloned repos directory
-    CLONE_DIR: Path = _project_root / "cloned_repos"
+    CLONE_DIR: Path = _project_root / ".cloned_repos"
 
     # File reading limits
     MAX_FILE_SIZE_BYTES: int = 100_000  # 100 KB per file

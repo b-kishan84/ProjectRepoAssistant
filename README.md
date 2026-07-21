@@ -10,7 +10,7 @@ An AI-powered chatbot that helps developers understand any public (or private) G
 - **Chat with the repo** — ask natural language questions about the codebase
 - **File explorer** — browse and get AI explanations of any file
 - **Interactive Code Snippets** — highlight any code in the editor and click "Ask AI" for instant context-aware help
-
+- **Resilient Disk Caching** — saves analysis to disk (`.repo_analysis.json`) to prevent data loss across backend restarts and minimize API calls
 ## Tech Stack
 
 | Component | Technology |
@@ -75,17 +75,17 @@ Navigate to `http://localhost:8501` in your browser, paste a GitHub URL, and sta
 ```
 GitHubRepoAssistant/
 ├── backend/
-│   ├── main.py              # FastAPI app & API endpoints
-│   ├── config.py            # Environment & settings
-│   ├── models.py            # Pydantic schemas
+│   ├── main.py               # FastAPI app & API endpoints
+│   ├── config.py             # Environment & settings
+│   ├── models.py             # Pydantic schemas
 │   ├── services/
-│   │   ├── repo_cloner.py   # Git clone operations
-│   │   ├── repo_analyzer.py # Repo analysis engine
-│   │   └── gemini_service.py# Gemini AI integration
+│   │   ├── repo_cloner.py    # Git clone operations
+│   │   ├── repo_analyzer.py  # Repo analysis engine
+│   │   └── gemini_service.py # Gemini AI integration
 │   └── utils/
-│       └── file_utils.py    # File helpers
+│       └── file_utils.py     # File helpers
 ├── frontend/
-│   └── app.py               # Streamlit UI
+│   └── app.py                # Streamlit UI
 ├── requirements.txt
 ├── .env.example
 └── README.md
